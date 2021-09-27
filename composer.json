@@ -1,0 +1,31 @@
+{
+    "name": "devoceanlt/laravel-camunda-queue-driver",
+    "description": "Camunda BPMN Engine driver for Laravel Queue.",
+    "keywords": ["laravel", "DevOceanLT", "camunda"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Marius Geležinis",
+            "email": "marius.gelezinis@devocean.lt",
+            "homepage": "https://www.devocean.lt",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.0",
+        "illuminate/queue": "^8.0",
+        "devoceanlt/camunda": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "DevOceanLT\\CamundaQueue\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "DevOceanLT\\CamundaQueue\\CamundaServiceProvider"
+            ]
+        }
+    }
+}
