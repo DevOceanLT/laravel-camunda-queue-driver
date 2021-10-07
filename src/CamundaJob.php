@@ -81,8 +81,10 @@ class CamundaJob extends Job implements JobContract
             'workerId' => "{$this->queue}QueueWorker",
         ];
 
-        foreach ($this->output as $key => $value) {
-            $parameters['localVariables'][$key] = ['value' => $value];
+        if ($this->output) {
+            foreach ($this->output as $key => $value) {
+                $parameters['localVariables'][$key] = ['value' => $value];
+            }
         }
 
         ExternalTaskClient::complete($this->job->id, $parameters);
