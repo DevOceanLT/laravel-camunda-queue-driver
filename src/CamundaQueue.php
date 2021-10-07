@@ -4,6 +4,7 @@ namespace DevOceanLT\CamundaQueue;
 
 use Exception;
 use Illuminate\Queue\Queue;
+use DevOceanLT\Camunda\Http\ExecutionClient;
 use DevOceanLT\Camunda\Http\ExternalTaskClient;
 use Illuminate\Contracts\Queue\Queue as QueueContract;
 
@@ -153,7 +154,10 @@ class CamundaQueue extends Queue implements QueueContract
         $jobs = ExternalTaskClient::fetchAndLock($parameters);
 
         if (count($jobs) > 0) {
-            return $jobs[0];
+            $job = $jobs[0];
+            $job->variables = ExecutionClient::getLocalVariables($job->executionId);
+
+            return $job;
         }
     }
 }

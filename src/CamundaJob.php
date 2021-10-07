@@ -28,6 +28,13 @@ class CamundaJob extends Job implements JobContract
     protected $job;
 
     /**
+     * The Camunda BPMN job output.
+     *
+     * @var array
+     */
+    public $output;
+
+    /**
      * Create a new job instance.
      *
      * @param  \Illuminate\Container\Container  $container
@@ -45,7 +52,7 @@ class CamundaJob extends Job implements JobContract
         $this->container = $container;
         $this->connectionName = $connectionName;
 
-        $this->topicToJobMap = config('queue.connections.camunda-bpmn.topicToJobMap');
+        $this->topicToJobMap = config('queue.connections.camunda.topicToJobMap');
     }
 
     /**
@@ -73,6 +80,10 @@ class CamundaJob extends Job implements JobContract
         $parameters = [
             'workerId' => "{$this->queue}QueueWorker",
         ];
+
+        foreach ($this->output as $key => $value) {
+            $parameters['localVariables'][$key] = ['value' => $value];
+        }
 
         ExternalTaskClient::complete($this->job->id, $parameters);
     }
@@ -109,6 +120,7 @@ class CamundaJob extends Job implements JobContract
         $job = new $this->topicToJobMap[$this->job->topicName];
         $job->queue = $this->job->topicName;
         $job->businessKey = $this->job->businessKey;
+        $job->variables = $this->job->variables;
 
         $body = [
             "uuid" => $this->job->id,
