@@ -2,6 +2,7 @@
 
 namespace DevOceanLT\CamundaQueue;
 
+use Illuminate\Support\Str;
 use Illuminate\Queue\Jobs\Job;
 use Illuminate\Container\Container;
 use Illuminate\Queue\Events\JobFailed;
@@ -35,6 +36,20 @@ class CamundaJob extends Job implements JobContract
     public $output;
 
     /**
+     * Default jobs namespace.
+     *
+     * @var string
+     */
+    private $jobLocation;
+
+    /**
+     * Topic to job class map.
+     *
+     * @var array
+     */
+    private $topicToJobMap;
+
+    /**
      * Create a new job instance.
      *
      * @param  \Illuminate\Container\Container  $container
@@ -52,6 +67,7 @@ class CamundaJob extends Job implements JobContract
         $this->container = $container;
         $this->connectionName = $connectionName;
 
+        $this->jobLocation = config('queue.connections.camunda.jobLocation');
         $this->topicToJobMap = config('queue.connections.camunda.topicToJobMap');
     }
 
@@ -119,14 +135,14 @@ class CamundaJob extends Job implements JobContract
      */
     public function getRawBody()
     {
-        $job = new $this->topicToJobMap[$this->job->topicName];
+        $job = new $this->getJobClassName();
         $job->queue = $this->job->topicName;
         $job->businessKey = $this->job->businessKey;
         $job->variables = $this->job->variables;
 
         $body = [
             "uuid" => $this->job->id,
-            "displayName" => $this->topicToJobMap[$this->job->topicName],
+            "displayName" => $this->getJobClassName(),
             "job" => "Illuminate\\Queue\\CallQueuedHandler@call",
             "maxTries" => null,
             "maxExceptions" => null,
@@ -134,7 +150,7 @@ class CamundaJob extends Job implements JobContract
             "timeout" => 10,
             "retryUntil" => null,
             "data" => [
-                "commandName" => $this->topicToJobMap[$this->job->topicName],
+                "commandName" => $this->getJobClassName(),
                 "command" => serialize($job)
             ]
         ];
@@ -159,7 +175,7 @@ class CamundaJob extends Job implements JobContract
      */
     public function getName()
     {
-        return $this->topicToJobMap[$this->job->topicName];
+        return $this->getJobClassName();
     }
 
     /**
@@ -195,5 +211,15 @@ class CamundaJob extends Job implements JobContract
                 $this->connectionName, $this, $e ?: new ManuallyFailedException
             ));
         }
+    }
+
+    private function getJobClassName()
+    {
+        $className = Str::finish($this->jobLocation, '\\') . Str::ucfirst($this->job->topicName);
+        if (class_exists($className)) {
+            return $className;
+        }
+
+        return $this->topicToJobMap[$this->job->topicName];
     }
 }

@@ -146,7 +146,7 @@ class CamundaQueue extends Queue implements QueueContract
             'topics' => [
                 [
                     'topicName' => $queue,
-                    'lockDuration' => 1
+                    'lockDuration' => 3600
                 ]
             ]
         ];

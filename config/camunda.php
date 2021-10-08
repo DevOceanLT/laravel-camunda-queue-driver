@@ -10,6 +10,7 @@ return [
     'driver' => 'camunda',
     'connection' => 'default',
     'queue' => env('CAMUNDA_QUEUE', 'default'),
+    'jobLocation' => 'App\Jobs\Bpmn',
     'topicToJobMap' => [
         'defaultTopic' => 'App\Jobs\DefaultTopicJob'
     ]
