@@ -135,7 +135,8 @@ class CamundaJob extends Job implements JobContract
      */
     public function getRawBody()
     {
-        $job = new $this->getJobClassName();
+        $className = $this->getJobClassName();
+        $job = new $className();
         $job->queue = $this->job->topicName;
         $job->businessKey = $this->job->businessKey;
         $job->variables = $this->job->variables;
