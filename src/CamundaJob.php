@@ -22,6 +22,13 @@ class CamundaJob extends Job implements JobContract
     protected $camundaQueue;
 
     /**
+     * The number of attempts.
+     *
+     * @var int
+     */
+    protected $attempts;
+
+    /**
      * The Camunda BPMN job payload.
      *
      * @var \stdClass
@@ -66,6 +73,8 @@ class CamundaJob extends Job implements JobContract
         $this->camundaQueue = $camundaQueue;
         $this->container = $container;
         $this->connectionName = $connectionName;
+
+        $this->attempts = 1;
 
         $this->jobLocation = config('queue.connections.camunda.jobLocation');
         $this->topicToJobMap = config('queue.connections.camunda.topicToJobMap');
@@ -113,9 +122,7 @@ class CamundaJob extends Job implements JobContract
      */
     public function attempts()
     {
-        // $retries = $this->job->retries ?? 3;
-        // return (int) (3 - $retries);
-        return 1;
+        return $this->attempts;
     }
 
     /**
@@ -190,6 +197,10 @@ class CamundaJob extends Job implements JobContract
         $parameters = [
             'workerId' => "{$this->queue}QueueWorker",
         ];
+
+        if ($e) {
+            $parameters['errorMessage'] = $e->getMessage();
+        }
 
         ExternalTaskClient::failure($this->job->id, $parameters);
 
