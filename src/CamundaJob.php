@@ -155,7 +155,7 @@ class CamundaJob extends Job implements JobContract
             "maxTries" => null,
             "maxExceptions" => null,
             "backoff" => null,
-            "timeout" => 30,
+            "timeout" => 60,
             "retryUntil" => null,
             "data" => [
                 "commandName" => $this->getJobClassName(),
