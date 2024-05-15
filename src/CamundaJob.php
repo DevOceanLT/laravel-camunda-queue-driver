@@ -108,7 +108,11 @@ class CamundaJob extends Job implements JobContract
 
         if ($this->output) {
             foreach ($this->output as $key => $value) {
-                $parameters['localVariables'][$key] = ['value' => $value];
+                if (is_array($value)) {
+                    $parameters['localVariables'][$key] = $value;
+                } else {
+                    $parameters['localVariables'][$key] = ['value' => $value];
+                }
             }
         }
 
