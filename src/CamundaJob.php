@@ -57,6 +57,13 @@ class CamundaJob extends Job implements JobContract
     private $topicToJobMap;
 
     /**
+     * Timeout.
+     *
+     * @var int
+     */
+    private $timeout;
+
+    /**
      * Create a new job instance.
      *
      * @param  \Illuminate\Container\Container  $container
@@ -78,6 +85,7 @@ class CamundaJob extends Job implements JobContract
 
         $this->jobLocation = config('queue.connections.camunda.jobLocation');
         $this->topicToJobMap = config('queue.connections.camunda.topicToJobMap');
+        $this->timeout = config('queue.connections.camunda.timeout');
     }
 
     /**
@@ -159,7 +167,7 @@ class CamundaJob extends Job implements JobContract
             "maxTries" => null,
             "maxExceptions" => null,
             "backoff" => null,
-            "timeout" => 60,
+            "timeout" => $this->timeout,
             "retryUntil" => null,
             "data" => [
                 "commandName" => $this->getJobClassName(),

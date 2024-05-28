@@ -2,6 +2,8 @@
 
 namespace DevOceanLT\CamundaQueue;
 
+use Illuminate\Queue\Failed\DatabaseFailedJobProvider;
+use Illuminate\Queue\Failed\DatabaseUuidFailedJobProvider;
 use Illuminate\Queue\QueueManager;
 use Illuminate\Support\ServiceProvider;
 use DevOceanLT\CamundaQueue\CamundaConnector;
@@ -34,5 +36,19 @@ class CamundaServiceProvider extends ServiceProvider
         $queue->addConnector('camunda', function () {
             return new CamundaConnector;
         });
+
+        if ($this->app['queue.failer'] instanceof DatabaseFailedJobProvider) {
+            $this->app->singleton('queue.failer', function ($app) {
+                $config = $app['config']['queue.failed'];
+                return new CamundaFailedJobProvider($app['db'], $config['database'], $config['table']);
+            });
+        }
+
+        if ($this->app['queue.failer'] instanceof DatabaseUuidFailedJobProvider) {
+            $this->app->singleton('queue.failer', function ($app) {
+                $config = $app['config']['queue.failed'];
+                return new CamundaUuidFailedJobProvider($app['db'], $config['database'], $config['table']);
+            });
+        }
     }
 }
