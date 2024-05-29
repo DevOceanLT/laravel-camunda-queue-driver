@@ -11,6 +11,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Queue\ManuallyFailedException;
 use DevOceanLT\Camunda\Http\ExternalTaskClient;
 use Illuminate\Contracts\Queue\Job as JobContract;
+use Symfony\Component\Console\Input\ArgvInput;
 
 class CamundaJob extends Job implements JobContract
 {
@@ -85,7 +86,11 @@ class CamundaJob extends Job implements JobContract
 
         $this->jobLocation = config('queue.connections.camunda.jobLocation');
         $this->topicToJobMap = config('queue.connections.camunda.topicToJobMap');
+
         $this->timeout = config('queue.connections.camunda.timeout');
+        if ((new ArgvInput())->hasParameterOption('--timeout')) {
+            $this->timeout = (new ArgvInput())->getParameterOption('--timeout');
+        }
     }
 
     /**
@@ -167,7 +172,7 @@ class CamundaJob extends Job implements JobContract
             "maxTries" => null,
             "maxExceptions" => null,
             "backoff" => null,
-            "timeout" => $this->timeout,
+            "timeout" => isset($job->timeout) ? $job->timeout : $this->timeout,
             "retryUntil" => null,
             "data" => [
                 "commandName" => $this->getJobClassName(),
